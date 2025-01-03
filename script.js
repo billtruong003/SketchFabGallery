@@ -2,7 +2,7 @@ const gallery = document.getElementById('gallery');
 const models = [];
 let currentPage = 1;
 const modelsPerPage = 12;
-const maxPagesToShow = 10; // Maximum number of page buttons to show before input field
+const maxPagesToShow = 10; // Maximum number of page buttons to show
 
 // Function to display models for the current page
 function displayModels(page) {
@@ -47,25 +47,40 @@ function updatePaginationButtons() {
     if (totalPages <= maxPagesToShow) {
         // Display all page buttons
         for (let i = 1; i <= totalPages; i++) {
-            const button = createPaginationButton(i, i !== currentPage, () => {
+            const button = createPaginationButton(i, true, () => {
                 currentPage = i;
                 displayModels(currentPage);
                 updatePaginationButtons();
             });
+            // Apply active class correctly
+            if (i === currentPage) {
+                button.classList.add('bg-blue-500', 'text-white');
+                button.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300', 'hover:bg-gray-300', 'dark:hover:bg-gray-600');
+            }
             pagination.appendChild(button);
         }
     } else {
         // Display input field and limited page buttons
 
-        // Display first few pages
+        // Display first two pages
         for (let i = 1; i <= 2; i++) {
-            const button = createPaginationButton(i, i !== currentPage, () => {
+            const button = createPaginationButton(i, true, () => {
                 currentPage = i;
                 displayModels(currentPage);
                 updatePaginationButtons();
             });
+            if (i === currentPage) {
+                button.classList.add('bg-blue-500', 'text-white');
+                button.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300', 'hover:bg-gray-300', 'dark:hover:bg-gray-600');
+            }
             pagination.appendChild(button);
         }
+
+        // Add ellipsis (...)
+        const ellipsis = document.createElement('span');
+        ellipsis.textContent = '...';
+        ellipsis.classList.add('px-4', 'py-2');
+        pagination.appendChild(ellipsis);
 
         // Input field for page number
         const pageInput = document.createElement('input');
@@ -87,13 +102,23 @@ function updatePaginationButtons() {
         });
         pagination.appendChild(pageInput);
 
-        // Display last few pages
+        // Add ellipsis (...)
+        const ellipsis2 = document.createElement('span');
+        ellipsis2.textContent = '...';
+        ellipsis2.classList.add('px-4', 'py-2');
+        pagination.appendChild(ellipsis2);
+
+        // Display last two pages
         for (let i = totalPages - 1; i <= totalPages; i++) {
-            const button = createPaginationButton(i, i !== currentPage, () => {
+            const button = createPaginationButton(i, true, () => {
                 currentPage = i;
                 displayModels(currentPage);
                 updatePaginationButtons();
             });
+            if (i === currentPage) {
+                button.classList.add('bg-blue-500', 'text-white');
+                button.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300', 'hover:bg-gray-300', 'dark:hover:bg-gray-600');
+            }
             pagination.appendChild(button);
         }
     }
