@@ -5,6 +5,7 @@ import time
 def get_model_info(model_id, api_token):
     """
     Lấy thông tin model từ Sketchfab Data API dựa trên model ID.
+    Lấy link embed thay vì link viewer.
 
     Args:
         model_id (str): ID của model.
@@ -18,26 +19,23 @@ def get_model_info(model_id, api_token):
 
     try:
         response = requests.get(url, headers=headers)
-        response.raise_for_status()  # Báo lỗi nếu request không thành công
+        response.raise_for_status()
 
         data = response.json()
 
         model_info = {
             "title": data["name"],
             "author": data["user"]["displayName"],
-            "url": data["viewerUrl"],  # Thay embedUrl bằng viewerUrl
+            "url": data["embedUrl"],
             "authorUrl": data["user"]["profileUrl"],
             "sketchfabUrl": "https://sketchfab.com",
-            "downloadLink": None  # Mặc định không có link download
+            "downloadLink": None
         }
 
-        # Lấy link download (nếu có)
         for format in data.get("download", []):
-            # Ưu tiên định dạng glb
             if format["format"] == "glb":
                 model_info["downloadLink"] = format["url"]
-                break  # Thoát vòng lặp khi tìm thấy glb
-            # Nếu không có glb, lấy link đầu tiên
+                break
             elif model_info["downloadLink"] is None:
                 model_info["downloadLink"] = format["url"]
 
@@ -46,11 +44,15 @@ def get_model_info(model_id, api_token):
         print(f"Lỗi khi lấy thông tin model {model_id}: {e}")
         if response:
             print(f"Status code: {response.status_code}, Response: {response.text}")
+            if response.status_code == 429:
+                print("Rate limit exceeded (429).")
+                return "RATE_LIMIT" # Trả về thông báo rate limit
         return None
 
 def process_model_urls(json_file, api_token, output_file="model_info.json"):
     """
-    Đọc file JSON chứa các URL, lấy thông tin chi tiết qua API và lưu vào file mới.
+    Đọc file JSON chứa các URL, lấy thông tin chi tiết qua API, in ra thông tin JSON và lưu vào file mới.
+    Thoát và lưu file ngay lập tức khi gặp lỗi rate limit 429.
 
     Args:
         json_file (str): Đường dẫn đến file JSON chứa danh sách các URL.
@@ -68,17 +70,26 @@ def process_model_urls(json_file, api_token, output_file="model_info.json"):
         return
 
     model_info_list = []
-    for url in model_urls:
+    for i, url in enumerate(model_urls):
         model_id = url.split('-')[-1]
         print(f"Đang lấy thông tin cho model: {url} (ID: {model_id})")
         model_info = get_model_info(model_id, api_token)
+        
+        if model_info == "RATE_LIMIT":
+            print(f"Lưu thông tin vào file {output_file} (bị rate limit)")
+            with open(output_file, "w", encoding="utf-8") as f:
+                json.dump(model_info_list, f, indent=4, ensure_ascii=False)
+            print("Đã lưu và thoát do rate limit.")
+            return
 
         if model_info:
             model_info_list.append(model_info)
+            print("Thông tin model đã lấy:")
+            print(json.dumps(model_info, indent=4, ensure_ascii=False))  # In thông tin JSON
         else:
             print(f"Không thể lấy thông tin cho model: {url}")
 
-        time.sleep(1)  # Tránh rate limit
+        #time.sleep(1)
 
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(model_info_list, f, indent=4, ensure_ascii=False)
@@ -88,6 +99,6 @@ def process_model_urls(json_file, api_token, output_file="model_info.json"):
 # Thay thế bằng API token của bạn
 api_token = "871230499397425b93ba976d96d76a8d"
 # Thay thế bằng đường dẫn đến file JSON chứa các URL
-json_file = "test.json"
+json_file = "featured_models.json"
 
 process_model_urls(json_file, api_token)

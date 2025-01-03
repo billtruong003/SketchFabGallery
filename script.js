@@ -3,14 +3,21 @@ const models = [];
 let currentPage = 1;
 const modelsPerPage = 12;
 const maxPagesToShow = 10; // Maximum number of page buttons to show
+const cachedPages = {}; // Object to store cached HTML elements
 
 // Function to display models for the current page
 function displayModels(page) {
+    if (cachedPages[page]) {
+        // If the page is cached, use the cached HTML
+        gallery.innerHTML = cachedPages[page];
+        return;
+    }
+
     const startIndex = (page - 1) * modelsPerPage;
     const endIndex = startIndex + modelsPerPage;
     const modelsToDisplay = models.slice(startIndex, endIndex);
 
-    gallery.innerHTML = ''; // Clear existing models
+    let pageHTML = ''; // Store HTML for the current page
 
     modelsToDisplay.forEach(model => {
         const modelElement = `
@@ -26,8 +33,11 @@ function displayModels(page) {
                 </div>
             </div>
         `;
-        gallery.innerHTML += modelElement;
+        pageHTML += modelElement;
     });
+
+    gallery.innerHTML = pageHTML;
+    cachedPages[page] = pageHTML; // Cache the HTML for the current page
 }
 
 // Function to update pagination buttons
