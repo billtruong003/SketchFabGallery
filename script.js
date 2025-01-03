@@ -54,7 +54,7 @@ function updatePaginationButtons() {
             });
             // Apply active class correctly
             if (i === currentPage) {
-                button.classList.add('bg-blue-500', 'text-white');
+                button.classList.add('bg-gray-500', 'text-white');
                 button.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300', 'hover:bg-gray-300', 'dark:hover:bg-gray-600');
             }
             pagination.appendChild(button);
@@ -62,25 +62,66 @@ function updatePaginationButtons() {
     } else {
         // Display input field and limited page buttons
 
-        // Display first two pages
-        for (let i = 1; i <= 2; i++) {
+        // Determine start and end pages for visible buttons
+        let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+        let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+        // Adjust if near the beginning or end
+        if (endPage - startPage + 1 < maxPagesToShow) {
+            if (currentPage < totalPages / 2) {
+                endPage = Math.min(totalPages, maxPagesToShow);
+                startPage = 1;
+            } else {
+                startPage = Math.max(1, totalPages - maxPagesToShow + 1);
+                endPage = totalPages;
+            }
+        }
+
+        // Display first page button (if not already visible)
+        if (startPage > 1) {
+            const button = createPaginationButton(1, true, () => {
+                currentPage = 1;
+                displayModels(currentPage);
+                updatePaginationButtons();
+            });
+            pagination.appendChild(button);
+            if (startPage > 2) {
+                const ellipsis = document.createElement('span');
+                ellipsis.textContent = '...';
+                ellipsis.classList.add('px-4', 'py-2');
+                pagination.appendChild(ellipsis);
+            }
+        }
+
+        // Display visible page buttons
+        for (let i = startPage; i <= endPage; i++) {
             const button = createPaginationButton(i, true, () => {
                 currentPage = i;
                 displayModels(currentPage);
                 updatePaginationButtons();
             });
             if (i === currentPage) {
-                button.classList.add('bg-blue-500', 'text-white');
+                button.classList.add('bg-gray-500', 'text-white');
                 button.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300', 'hover:bg-gray-300', 'dark:hover:bg-gray-600');
             }
             pagination.appendChild(button);
         }
 
-        // Add ellipsis (...)
-        const ellipsis = document.createElement('span');
-        ellipsis.textContent = '...';
-        ellipsis.classList.add('px-4', 'py-2');
-        pagination.appendChild(ellipsis);
+        // Display last page button (if not already visible)
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                const ellipsis = document.createElement('span');
+                ellipsis.textContent = '...';
+                ellipsis.classList.add('px-4', 'py-2');
+                pagination.appendChild(ellipsis);
+            }
+            const button = createPaginationButton(totalPages, true, () => {
+                currentPage = totalPages;
+                displayModels(currentPage);
+                updatePaginationButtons();
+            });
+            pagination.appendChild(button);
+        }
 
         // Input field for page number
         const pageInput = document.createElement('input');
@@ -102,25 +143,7 @@ function updatePaginationButtons() {
         });
         pagination.appendChild(pageInput);
 
-        // Add ellipsis (...)
-        const ellipsis2 = document.createElement('span');
-        ellipsis2.textContent = '...';
-        ellipsis2.classList.add('px-4', 'py-2');
-        pagination.appendChild(ellipsis2);
 
-        // Display last two pages
-        for (let i = totalPages - 1; i <= totalPages; i++) {
-            const button = createPaginationButton(i, true, () => {
-                currentPage = i;
-                displayModels(currentPage);
-                updatePaginationButtons();
-            });
-            if (i === currentPage) {
-                button.classList.add('bg-blue-500', 'text-white');
-                button.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300', 'hover:bg-gray-300', 'dark:hover:bg-gray-600');
-            }
-            pagination.appendChild(button);
-        }
     }
 
     // Create "Next" button
