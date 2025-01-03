@@ -1,7 +1,7 @@
 const gallery = document.getElementById('gallery');
 const models = [];
 let currentPage = 1;
-const modelsPerPage = 12;
+const modelsPerPage = 9;
 const maxPagesToShow = 10; // Maximum number of page buttons to show
 const cachedPages = {}; // Object to store cached HTML elements
 
