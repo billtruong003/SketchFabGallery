@@ -129,7 +129,20 @@ function updatePaginationButtons() {
         pageInput.min = 1;
         pageInput.max = totalPages;
         pageInput.value = currentPage;
-        pageInput.classList.add('w-16', 'px-2', 'py-1', 'mx-1', 'border', 'rounded', 'text-center');
+        pageInput.classList.add(
+            'w-16',
+            'px-2',
+            'py-1',
+            'mx-1',
+            'border',
+            'rounded',
+            'text-center',
+            'bg-gray-700',       // Dark background for dark mode
+            'dark:bg-gray-800',   // Explicit dark mode background
+            'text-white',         // White text color for dark mode
+            'placeholder-gray-400', // Lighter placeholder text in dark mode (optional)
+            'dark:text-gray-200'   // Ensure text is visible in dark mode
+        );
         pageInput.addEventListener('change', () => {
             let newPage = parseInt(pageInput.value);
             if (newPage >= 1 && newPage <= totalPages) {
